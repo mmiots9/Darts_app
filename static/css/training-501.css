@@ -1,0 +1,144 @@
+/* Tag selector */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    text-align: center;
+}
+
+body {
+    background-color: green;
+    padding: 0 4vw;
+}
+
+header {
+    align-items: center;
+    color: white;
+    display: flex;
+    font-weight: normal;
+    font-size: 1rem;
+    height: 10vh;
+    justify-content: center;
+}
+
+footer {
+    margin-top: 1vh;
+}
+
+/* Class selector */
+.action-btn,
+.multiplier-btn,
+.sector-btn {
+    /* background-color: #f3ff86af; */
+    border-radius: 1rem;
+    border: 2px solid red;
+    float: left;
+    font-size: 1.1rem;
+    height: 8vh;
+    margin: 1% 0.5%;
+    width: 13%;
+}
+
+.action-btn:hover,
+.multiplier-btn:hover,
+.sector-btn:hover {
+    background-color: rgba(206, 216, 118, 0.859);
+}
+
+.busted {
+    background-color: red;
+}
+
+.dart-score {
+    width: 33%;
+}
+
+.multiplier-btn-active#double {
+    background-color: blue;
+    color: whitesmoke;
+}
+
+.multiplier-btn-active#triple {
+    background-color: red;
+    color: whitesmoke;
+}
+
+.sector-btn:active {
+    background-color: #EFEFEF;
+}
+
+.pressed {
+    background-color: blue;
+}
+
+.wrapper {
+    background-color: white;
+    height: 85vh;
+    padding: 0% 1%;
+    width: 100%;
+}
+
+/* Id selector */
+#dart-score-table{
+    font-size: 1.2rem;
+    height: 50%;
+    padding: 0% 1%;
+    text-align: center;
+    width: 50%;
+}
+
+#dashboard {
+    align-items: center;
+    display: flex;
+    height: 30%;
+    padding: 5% 0%;
+    width: 100%;
+}
+
+#double, #triple {
+    width: 27%;
+}
+
+#score {
+    font-size: 5.5rem;
+    text-align: center;
+    width: 50%;
+}
+
+#score-container {
+    background-color: DodgerBlue;
+    float: left;
+    height: 100%;
+    width: 50%;
+    position: flex;
+    align-items: center;
+}
+
+#sectors-container {
+    width: 92vw;
+}
+
+#separator {
+    align-items: center;
+    border: 1px solid red;
+    color: red;
+    display: flex;
+    font-size: 1.5rem;
+    font-weight: bold;
+    height: 6vh;
+    justify-content: center;
+    margin: 5vh 0;
+    
+}
+
+#tables-container {
+    align-items: center;
+    display: flex;
+    float: left;
+    justify-content: center;
+    width: 50%;
+}
+
+#undo {
+    margin-left: 14.5%;
+}
+
