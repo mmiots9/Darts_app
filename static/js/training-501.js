@@ -12,7 +12,7 @@ var previousScore = 501;
 var visitDart = 1;
 var visitScore = 0;
 var visitScores = [];
-var startScore = 10;
+var startScore = 501;
 
 $(document).ready(function() {
 
