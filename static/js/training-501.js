@@ -13,6 +13,7 @@ var visitDart = 1;
 var visitScore = 0;
 var visitScores = [];
 var startScore = 501;
+var nEmpty = 3;
 
 $(document).ready(function() {
 
@@ -209,7 +210,9 @@ $(document).ready(function() {
     $("#undo").on("click", function() {
 
         // Change score
-        userScores.pop();
+        if (userScores.length > 1) {
+            userScores.pop();
+        }
         previousScore = userScores[userScores.length - 1];
         $("#score").text(previousScore);
 
@@ -225,6 +228,12 @@ $(document).ready(function() {
         $("#mean-score").text(mean);
 
         // TODO: Delete dart-score scores
+        nEmpty = $(".empty").length;
+        if (nEmpty < 3) {
+            $($(".dart-score")[2 - nEmpty]).addClass("empty");  
+            $($(".dart-score")[2 - nEmpty]).html("&nbsp");
+        }
+        
 
     })
 
