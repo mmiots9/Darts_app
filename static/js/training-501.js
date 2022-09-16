@@ -14,6 +14,7 @@ var visitScore = 0;
 var visitScores = [];
 var startScore = 501;
 var nEmpty = 3;
+var whichMultiplier = null;
 
 $(document).ready(function() {
 
@@ -42,6 +43,12 @@ $(document).ready(function() {
     function isMultiplierActive() {
         return $(".multiplier-btn-active").length > 0;
     }
+    
+    function hasBusted() {
+        return (tempScore < 0 || 
+            tempScore === 1 ||
+            (tempScore === 0 && !(/[d]/.test(handScoreCh))))
+    } 
 
     function gameOver() {
         $("#separator-inner").text("WINNER");
@@ -66,7 +73,7 @@ $(document).ready(function() {
 
     // Check if multiplier
         if (isMultiplierActive()) {
-            var whichMultiplier = $(".multiplier-btn-active")[0].id
+            whichMultiplier = $(".multiplier-btn-active")[0].id
             switch (whichMultiplier) {
                 case "double":
                     $("#double").removeClass("multiplier-btn-active");
@@ -93,9 +100,7 @@ $(document).ready(function() {
 
 
         // Check if busted
-        if (tempScore < 0 || 
-            tempScore === 1 ||
-            (tempScore === 0 && !(/[d]/.test(handScoreCh)))) {
+        if (hasBusted()) {
             // change backgorund color
             $("body").addClass("busted");
             // write busted in separator
@@ -129,7 +134,7 @@ $(document).ready(function() {
         console.log(visitDart);
 
         // Game over
-        if (tempScore === 0) { gameOver();}
+        if (tempScore === 0) {gameOver();}
 
         // Change visitDart and visitScore
         visitScore = tempScore;
@@ -169,7 +174,7 @@ $(document).ready(function() {
     });
 
     // listen to multiplier-btn
-    $(".multiplier-btn").on("click", function() {  
+    $(".multiplier-btn").on("click", function() {
         whichMultiplier = this.id;
 
         if (whichMultiplier === "triple") {
@@ -227,7 +232,7 @@ $(document).ready(function() {
         mean = calculateMean(userScores, numberOfDarts).toFixed(2);
         $("#mean-score").text(mean);
 
-        // TODO: Delete dart-score scores
+        // Delete dart-score scores
         nEmpty = $(".empty").length;
         if (nEmpty < 3) {
             $($(".dart-score")[2 - nEmpty]).addClass("empty");  
