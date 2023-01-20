@@ -131,11 +131,6 @@ $(document).ready(function() {
         $("#score").text(tempScore);
         userScores.push(tempScore);
 
-        console.log(visitDart);
-
-        // Game over
-        if (tempScore === 0) {gameOver();}
-
         // Change visitDart and visitScore
         visitScore = tempScore;
 
@@ -156,6 +151,9 @@ $(document).ready(function() {
 
         // Change mean score
         $("#mean-score").text(mean);
+        
+        // Game over
+        if (tempScore === 0) {gameOver();}
     }
 
 
@@ -234,11 +232,22 @@ $(document).ready(function() {
 
         // Delete dart-score scores
         nEmpty = $(".empty").length;
-        if (nEmpty < 3) {
+        if (nEmpty == 2 & userScores.length > 2) {
+            $($(".dart-score")[0]).html(userDarts[userDarts.length - 3])
+            $($(".dart-score")[1]).removeClass("empty");
+            $($(".dart-score")[1]).html(userDarts[userDarts.length - 2])
+            $($(".dart-score")[2]).removeClass("empty");
+            $($(".dart-score")[2]).html(userDarts[userDarts.length - 1])
+        } else if (nEmpty < 3) {
             $($(".dart-score")[2 - nEmpty]).addClass("empty");  
             $($(".dart-score")[2 - nEmpty]).html("&nbsp");
-        }
+        } 
         
+        // Reset back number visit dart and visit score
+        if (visitDart == 1) {
+            visitDart = 3;
+            visitScores.pop();
+        } else {visitDart -= 1}
 
     })
 
