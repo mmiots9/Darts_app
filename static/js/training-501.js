@@ -16,6 +16,8 @@ var startScore = 501;
 var nEmpty = 3;
 var whichMultiplier = null;
 
+var server_data = [];
+
 $(document).ready(function() {
 
     console.log("Starting 501 training game");
@@ -60,6 +62,23 @@ $(document).ready(function() {
         
         // Let appear restart button
         $("#restart").css("display", "inline");
+
+        // add server data
+        server_data = [{"user_darts": userDarts},
+        {"user_scores": userScores},
+        {"visit_scores": visitScores}]
+
+        $.ajax({
+        type: "POST",
+        url: "/training-501/results",
+        data: JSON.stringify(server_data),
+        contentType: "application/json",
+        dataType: 'json',
+        success: function(result) {
+            console.log("Result:");
+            console.log(result);
+        } 
+});
 
         // TODO: let appear "stats" button to go to another page using flask
     }
@@ -131,11 +150,6 @@ $(document).ready(function() {
         $("#score").text(tempScore);
         userScores.push(tempScore);
 
-        console.log(visitDart);
-
-        // Game over
-        if (tempScore === 0) {gameOver();}
-
         // Change visitDart and visitScore
         visitScore = tempScore;
 
@@ -156,6 +170,9 @@ $(document).ready(function() {
 
         // Change mean score
         $("#mean-score").text(mean);
+        
+        // Game over
+        if (tempScore === 0) {gameOver();}
     }
 
 
@@ -234,11 +251,22 @@ $(document).ready(function() {
 
         // Delete dart-score scores
         nEmpty = $(".empty").length;
-        if (nEmpty < 3) {
+        if (nEmpty == 2 & userScores.length > 2) {
+            $($(".dart-score")[0]).html(userDarts[userDarts.length - 3])
+            $($(".dart-score")[1]).removeClass("empty");
+            $($(".dart-score")[1]).html(userDarts[userDarts.length - 2])
+            $($(".dart-score")[2]).removeClass("empty");
+            $($(".dart-score")[2]).html(userDarts[userDarts.length - 1])
+        } else if (nEmpty < 3) {
             $($(".dart-score")[2 - nEmpty]).addClass("empty");  
             $($(".dart-score")[2 - nEmpty]).html("&nbsp");
-        }
+        } 
         
+        // Reset back number visit dart and visit score
+        if (visitDart == 1) {
+            visitDart = 3;
+            visitScores.pop();
+        } else {visitDart -= 1}
 
     })
 
