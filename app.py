@@ -24,5 +24,18 @@ def process_qt_calculation():
     results = {'processed': 'true'}
     return jsonify(results)
 
+@app.route("/training/five-clusures")
+def five_closures():
+    return render_template('training/five-closures.html')
+
+@app.route('/training/five-closures/results', methods=['POST', 'GET'])
+def process_training_five_clusures_result():
+  if request.method == "POST":
+    global training_five_closures_results
+    training_five_closures_results = request.get_json()
+    print(training_five_closures_results)
+    results = {'processed': 'true'}
+    return jsonify(results)
+
 if __name__ == "__main__":
     app.run(debug = True)
