@@ -1,7 +1,8 @@
 // USEFUL VARIABLES
-const possibleClosures = [41, 42, 43, 44, 45, 46, 47];
-const nClosures = 5;
-var actualClosure = 1;
+
+// TODO: Set difficulty
+const possibleCheckouts = [41, 42, 43, 44, 45, 46, 47];
+const nCheckouts = 5;
 
 
 var whichMultiplier = null;
@@ -13,27 +14,25 @@ var server_data = [];
 
 $(document).ready(function() {
 
-    console.log("Starting Five closures training session");
+    console.log("Starting Five checkouts training session");
 
     //-------------------------- PLAYER CLASS ---------------------------//
     class Player {
-        constructor(name, firstClosure) {
+        constructor(name, firstCheckout) {
             this.name = name;
             this.darts = [];
             this.visit = [];
-            this.score = firstClosure;
+            this.score = firstCheckout;
             this.tempScore = 0;
-            this.askedClosures = [firstClosure];
-            this.closedClosures = 0;
-            this.dartScore = null;
+            this.askedCheckouts = [firstCheckout];
+            this.closedCheckouts = [];
             this.dartCh = null;
             this.precision = 0.00;
         }
 
-        throwDart(dartScore, dartCh) {
+        throwDart(dartCh) {
 
-            // 1. Change dartScore and dartCh
-            this.dartScore = dartScore;
+            // 1. Change dartCh
             this.dartCh = dartCh;
 
             // 2. Add dartCh to visit
@@ -61,10 +60,10 @@ $(document).ready(function() {
                 this.addNaN();
 
                 // 4.5 Close visit
-                this.closeVisit()
+                this.closeVisit(0)
 
-                // 4.6 Update asked closures
-                this.updateAskedClosures()
+                // 4.6 Update asked checkouts
+                this.updateAskedCheckouts()
 
                 // 4.6 Return
                 return false;
@@ -84,8 +83,8 @@ $(document).ready(function() {
                 // 1. Add NaN
                 this.addNaN();
 
-                // 2. Set new closure
-                this.nextClosure();
+                // 2. Set new checkout
+                this.nextCheckout();
 
                 console.log(this);
 
@@ -97,10 +96,10 @@ $(document).ready(function() {
             if (this.visit.length === 3) {
 
                 // 1. Close visit
-                this.closeVisit();
+                this.closeVisit(0);
 
-                // 2. Update asked closures
-                this.updateAskedClosures()
+                // 2. Update asked checkouts
+                this.updateAskedCheckouts()
             }
 
         }
@@ -109,8 +108,8 @@ $(document).ready(function() {
             $("#score").text(this.score);
         }
 
-        showClosedClosures() {
-            $("#number-of-success").text(this.closedClosures);
+        showClosedCheckouts() {
+            $("#number-of-success").text(this.calculateClosedCheckouts());
         }
 
         showPrecision() {
@@ -118,7 +117,7 @@ $(document).ready(function() {
         }
 
         updateTempScore() {
-            this.tempScore = this.score - this.dartScore;
+            this.tempScore = this.askedCheckouts[this.askedCheckouts.length - 1] - this.calculateVisitScore();
         }
 
         hasBusted() {
@@ -133,11 +132,11 @@ $(document).ready(function() {
         }
 
         resetScore() {
-            this.score = this.askedClosures[this.askedClosures.length - 1];
+            this.score = this.askedCheckouts[this.askedCheckouts.length - 1];
             $("#score").text(this.score);
         }
 
-        closeVisit() {
+        closeVisit(hasClosed) {
             // 1. Add visit to darts and reset it
             this.darts.push(this.visit);
             this.visit = [];
@@ -146,44 +145,133 @@ $(document).ready(function() {
             this.resetScore();
             resetEmpty();
 
-            // 3. Update precision
-            this.precision = (this.closedClosures/this.darts.length + Number.EPSILON) * 100;
+            // 3. Add hasClosed to closedCheckouts
+            this.closedCheckouts.push(Number(hasClosed));
+            
+            // 4. Update closedCheckouts 
+            this.showClosedCheckouts()
+
+            // 5. Update precision
+            this.precision = this.calculatePrecision();
             
             this.showPrecision();
         }
 
-        nextClosure() {
-            // 1. Update closed closures
-            this.closedClosures += 1;
-            this.showClosedClosures();
+        nextCheckout() {
 
-            // 2. Close visit 
-            this.closeVisit();
+            // 1. Close visit 
+            this.closeVisit(1);
 
-            // 3. If last closure, finish game
-            if (this.closedClosures === nClosures) {
+            // 2. If last checkout, finish game
+            if (this.closedCheckouts === nCheckouts) {
                 gameOver();
                 
                 return false;
             }
 
-            // 4. Update asked closures
-            this.askedClosures.push(selectedClosures[this.closedClosures]);
+            // 3. Update asked checkouts
+            this.askedCheckouts.push(selectedCheckouts[this.calculateClosedCheckouts()]);
 
-            // 5. Update score
-            this.score = selectedClosures[this.closedClosures];
+            // 4. Update score
+            this.score = selectedCheckouts[this.calculateClosedCheckouts()];
             this.showScore();
         }
 
-        updateAskedClosures() {
-            this.askedClosures.push(this.askedClosures[this.askedClosures.length - 1]);
+        updateAskedCheckouts() {
+            this.askedCheckouts.push(this.askedCheckouts[this.askedCheckouts.length - 1]);
         };
+
+        calculateClosedCheckouts() { return this.closedCheckouts.reduce((a, b) => a + b, 0);}
+
+        calculatePrecision() {
+            return (this.calculateClosedCheckouts()/this.darts.length + Number.EPSILON) * 100;}
+
+        calculateVisitScore() {
+            return this.visit.reduce((a, b) => this.calculateDartValue(a) + this.calculateDartValue(b), 0);
+        }
+
+        calculateDartValue(dart) {
+            if (/[d]/.test(dart)) {return (dart.replace('d', '') * 2);}
+            if (/[t]/.test(dart)) {return (dart.replace('t', '') * 3);}
+            return dart * 1;
+        }
+
+        undo() {
+
+            // 1. Check if visit is already over
+            if (this.visit.length === 0) {
+                // 1.1 Check if it is the beginning, return false
+                if (this.darts.length === 0) { return false; }  
+
+                // 1.2 Set last darts as visit and pop it
+                this.visit = this.darts.pop();
+
+                // 1.3 Pop last asked checkout
+                this.askedCheckouts.pop();
+
+                // 1.4 Pop last closed checkout
+                this.closedCheckouts.pop();
+
+                // 1.5 Update precision
+                if (this.darts.length === 0) { 
+                    this.precision = 0;
+                } else {
+                    this.precision = this.calculatePrecision();
+                }
+                
+                this.showPrecision();
+
+                // 1.6 Update closed checkouts
+                this.showClosedCheckouts();
+            }
+            
+            // 3. Remove NaN in visit
+            this.visit = this.visit.filter( value => !Number.isNaN(value) );
+
+            // 4. Remove last dart in visit (repeat if is NaN)
+            this.visit.pop();
+
+            // 5. Update score
+            this.updateTempScore();
+            this.score = this.tempScore;
+            this.showScore();
+
+            
+            
+            // 6. Update shown darts
+            // 6.1 Get number of empty
+            nEmpty = $(".empty").length;
+            console.log(nEmpty);
+            console.log(this.visit);
+
+            // 6.2 If number of empty < 3 remove last dart and return
+            if (nEmpty < 3) {
+                $($(".dart-score")[2 - nEmpty]).addClass("empty");  
+                $($(".dart-score")[2 - nEmpty]).html("&nbsp");
+
+                return false;
+            }
+
+            // 6.3 Reset first dart in any case
+            $($(".dart-score")[0]).html(this.visit[0]);
+            $($(".dart-score")[0]).removeClass("empty");
+            
+            // 6.4 Return if last visit has only two darts
+            if (this.visit.length == 1) {
+                return false;
+            }
+
+            // 6.3 Reset second dart
+            $($(".dart-score")[1]).html(this.visit[1]);
+            $($(".dart-score")[1]).removeClass("empty");
+            
+        }
         
 
     };
 
     //---------------------------- FUNCTIONS ----------------------------//
-    function getClosures(arr, num) {
+    function getCheckouts(arr, num) {
         const shuffled = [...arr].sort(() => 0.5 - Math.random());
         return shuffled.slice(0, num);
     }
@@ -214,7 +302,7 @@ $(document).ready(function() {
 
         $.ajax({
         type: "POST",
-        url: "/training/five-closures/results",
+        url: "/training/five-checkouts/results",
         data: JSON.stringify(server_data),
         contentType: "application/json",
         dataType: 'json',
@@ -224,15 +312,15 @@ $(document).ready(function() {
         } });
     }
 
-    //---------------------- SELECT RANDOM CLOSURES ---------------------//
-    selectedClosures = getClosures(possibleClosures, nClosures);
+    //---------------------- SELECT RANDOM CHECKOUTS ---------------------//
+    selectedCheckouts = getCheckouts(possibleCheckouts, nCheckouts);
 
     //------------------------ INITIALIZE PLAYER ------------------------//
-    let player1 = new Player("Matteo", selectedClosures[0]);
+    let player1 = new Player("Matteo", selectedCheckouts[0]);
 
     //------------------------- SHOW PLAYER STAT ------------------------//
     player1.showScore();
-    player1.showClosedClosures();
+    player1.showClosedCheckouts();
     player1.showPrecision();
 
     //----------------------------- BUTTONS -----------------------------//
@@ -243,8 +331,8 @@ $(document).ready(function() {
         if ($(this).attr('disabled')) { return false; }
 
         // If enabled
-        // 1. Set dartScore and dartCh
-        dartScore = dartCh = this.id;
+        // 1. Set dartCh
+        dartCh = this.id;
         
         // 2. Enable 25
         $("#25").attr('disabled', false)
@@ -252,24 +340,22 @@ $(document).ready(function() {
         // 3. If no dart-score is empty, reset all them
         if ($(".empty").length === 0) { resetEmpty() }
 
-        // 4. Check if multiplier is active and change dartScore and dartCh
+        // 4. Check if multiplier is active and change dartCh
         if (isMultiplierActive()) {
             whichMultiplier = $(".multiplier-btn-active")[0].id
             switch (whichMultiplier) {
                 case "double":
                     $("#double").removeClass("multiplier-btn-active");
                     dartCh = "d" + dartCh;
-                    dartScore *= 2;
                     break;
                 case "triple":
                     $("#triple").removeClass("multiplier-btn-active");
                     dartCh = "t" + dartCh;
-                    dartScore *= 3;
                     break;
                 }}
 
         // 5. Throw dart for player
-        player1.throwDart(dartScore, dartCh);
+        player1.throwDart(dartCh);
             
     });
 
@@ -313,43 +399,7 @@ $(document).ready(function() {
 
     // Add functionality to undo button
     $("#undo").on("click", function() {
-
-        // Change score
-        if (userScores.length > 1) {
-            userScores.pop();
-        }
-        previousScore = userScores[userScores.length - 1];
-        $("#score").text(previousScore);
-
-        // Remove darts
-        userDarts.pop();
-
-        // Remove number of darts
-        if (numberOfDarts > 0) {numberOfDarts -= 1;};
-        $("#number-of-darts").text(numberOfDarts);
-
-        // Change mean score
-        mean = calculateMean(userScores, numberOfDarts).toFixed(2);
-        $("#mean-score").text(mean);
-
-        // Delete dart-score scores
-        nEmpty = $(".empty").length;
-        if (nEmpty == 2 & userScores.length > 2) {
-            $($(".dart-score")[0]).html(userDarts[userDarts.length - 3])
-            $($(".dart-score")[1]).removeClass("empty");
-            $($(".dart-score")[1]).html(userDarts[userDarts.length - 2])
-            $($(".dart-score")[2]).removeClass("empty");
-            $($(".dart-score")[2]).html(userDarts[userDarts.length - 1])
-        } else if (nEmpty < 3) {
-            $($(".dart-score")[2 - nEmpty]).addClass("empty");  
-            $($(".dart-score")[2 - nEmpty]).html("&nbsp");
-        } 
-        
-        // Reset back number visit dart and visit score
-        if (visitDart == 1) {
-            visitDart = 3;
-            visitScores.pop();
-        } else {visitDart -= 1}
+        player1.undo();
 
     })
 
